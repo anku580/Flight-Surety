@@ -12,11 +12,30 @@ contract FlightSuretyData {
     address private contractOwner;                                      // Account used to deploy contract
     address[] private registeredAirlinesAddress;
 
+     struct Flight {
+        string code;
+        string from;
+        string to;
+        bool isRegistered;
+        bool isInsured;
+        uint8 statusCode;
+        uint256 departureDate;
+        address airline;
+        address[] insuredPassengers;
+    }
+
+    struct Insurance {
+        bytes32 flightHash;
+        int amount;
+    }
+
     bool private operational = true;               // Blocks all state changes throughout the contract if false
 
     mapping (address => bool) private registeredAirlines;
     mapping (address => address[]) private voteToAddAirline;
     mapping(address => uint) private fundedAirlines;
+    mapping(bytes32 => Flight) private registeredFlights;
+    mapping(address => Insurance[]) private passengersInsuredFlights;
 
     uint256 public constant MIN_FLIGHT_FUND_AMOUNT = 10 ether;
     uint256 public constant MAX_FLIGHT_INSURANCE = 1 ether;
@@ -71,6 +90,12 @@ contract FlightSuretyData {
     modifier requireIsAirlineRegisterd(address airline)
     {
         require(registeredAirlines[airline] == true, 'Airline not registered');
+        _;
+    }
+
+    modifier requireIsAirlineFunded(address airline)
+    {
+        require(isAirlineFunded(airline) == true, 'Airline not funded the minimum amount');
         _;
     }
 
@@ -183,7 +208,56 @@ contract FlightSuretyData {
         }
     }
 
+    function registerFlight(string _flightCode, string _origin, string destination,
+     uint256 _departureDate) external
+        requireIsAirlineRegisterd(msg.sender)
+        requireIsAirlineFunded(msg.sender) {
 
+            bytes32 flightHash = getFlightKey(msg.sender, _flightCode, _departureDate);
+            require(registeredFlights[flightHash].isRegistered == false, 'Flight already registered');
+
+            Flight memory addNewFlight = Flight({
+                code : _flightCode,
+                from : _origin,
+                to : _destination,
+                isRegistered : true,
+                isInsured : false,
+                statusCode : 0,
+                departureDate : _departureDate,
+                airline : msg.sender,
+                insuredPassengers : new address[](0)
+            });
+
+            registeredFlights[flightHash] = addNewFlight;
+    }
+
+    function alreadyInsured(address _airline, address _passenger, string _flightCode, uint256 _departureDate) external 
+    {
+        bytes32 flightHash = getFlightKey(_airline, _flightCode, _departureDate);
+        bool insured = false;
+
+        for(int i=0; i<passengersInsuredFlights[_passenger].length; i++)
+        {
+            if(passengersInsuredFlights[_passenger][i].flightHash == flightHash) {
+                insured = true;
+                break;
+            }
+        }
+
+        return insured;
+    }
+
+    function buyInsurance(address _airline, string _flightCode, uint256 _departureDate) external payable
+    {
+        require(alreadyInsured(_airline, msg.sender, _flightCode, _departureDate) == false, 'Already Insured');
+        require(msg.value <= 1 ether && msg.value > 0 ether, "Not enought ethers!!");
+        bytes32 flightHash = getFlightKey(_airline, _flightCode, _departureDate);
+
+        passengersInsuredFlights[msg.sender].push(new Insurance(flightHash, msg.value));
+
+        Flight storage flight = registeredFlights[flightHash];
+        flight.insuredPassengers.push(msg.sender);
+    }
 
    /**
     * @dev Buy insurance for a flight
@@ -231,11 +305,14 @@ contract FlightSuretyData {
     *
     */   
     function fund
-                            (   
+                            ( 
+                                address airline  
                             )
                             public
                             payable
     {
+        require(msg.value >= MIN_FLIGHT_FUND_AMOUNT, 'Insufficient ethers to fund the airline');
+        
     }
 
     function getFlightKey
