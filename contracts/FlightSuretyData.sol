@@ -250,7 +250,7 @@ contract FlightSuretyData {
     function buyInsurance(address _airline, string _flightCode, uint256 _departureDate) external payable
     {
         require(alreadyInsured(_airline, msg.sender, _flightCode, _departureDate) == false, 'Already Insured');
-        require(msg.value <= 1 ether && msg.value > 0 ether, "Not enought ethers!!");
+        require(msg.value <= 1 ether && msg.value > 0 ether, "Not enough ethers!!");
         bytes32 flightHash = getFlightKey(_airline, _flightCode, _departureDate);
 
         passengersInsuredFlights[msg.sender].push(new Insurance(flightHash, msg.value));
