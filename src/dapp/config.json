@@ -1,0 +1,10 @@
+{
+	"localhost": {
+		"url": "http://127.0.0.1:9545",
+		"dataAddress": "0x1b7fC23acF8670bABdF1215B216A518222E34A6c",
+		"appAddress": "0x1337b11C711Adc19f1b05CC3688806c0Df1B85B1",
+		"firstAirline": "0x40f98192BBB85FfEEF5371F60BeE3d32d3bb1B98",
+		"gas": 4700000,
+		"gasPrice": 8000000000
+	}
+}
