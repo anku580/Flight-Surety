@@ -17,7 +17,7 @@ export default class Contract {
         this.airlines = [];
         this.passengers = [];
         console.log(config.firstAirline)
-        this.firstAirline = config.firstAirline;
+        this.firstAirline = config.dataAddress;
     }
 
     initialize(callback) {

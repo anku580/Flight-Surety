@@ -67,7 +67,7 @@ import './flightsurety.css';
             let insuranceValue = DOM.elid('insurance-value').value;
             // Write transaction
             contract.buy(flightAirlineAddress, flightNumber, timestamp, passengerAddress, insuranceValue, (error, result) => {
-                log('Flight', 'Buy insurance', [ { label: 'Buy insurance', error: error, value: result.insuree + ' ' + result.value } ]);
+                display('Flight', 'Buy insurance', [ { label: 'Buy insurance', error: error, value: result.insuree + ' ' + result.value } ]);
             });
         })
 
@@ -75,7 +75,7 @@ import './flightsurety.css';
             let passengerAddress = DOM.elid('withdraw-passenger-address').value;
             // Write transaction
             contract.withdraw(passengerAddress, (error, result) => {
-                log('Passenger', 'Claim insurance', [ { label: 'Insurance', error: error, value: result.passenger } ]);
+                display('Passenger', 'Claim insurance', [ { label: 'Insurance', error: error, value: result.passenger } ]);
             });
         })
 
@@ -85,7 +85,7 @@ import './flightsurety.css';
             let timestamp = DOM.elid('oracle-timestamp').value;
             // Write transaction
             contract.fetchFlightStatus(airlineAddress, flightNumber, timestamp, (error, result) => {
-                log('Oracles', 'Trigger oracles', [ { label: 'Fetch Flight Status', error: error, value: result.flight + ' ' + result.timestamp} ]);
+                display('Oracles', 'Trigger oracles', [ { label: 'Fetch Flight Status', error: error, value: result.flight + ' ' + result.timestamp} ]);
             });
         })
     });
